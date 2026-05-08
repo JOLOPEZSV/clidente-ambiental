@@ -1,0 +1,799 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Diagnóstico de Desempeño Ambiental 2025</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        :root {
+            --primary: #2563eb;
+            --primary-hover: #1d4ed8;
+            --bg-color: #f8fafc;
+            --card-bg: #ffffff;
+            --text-main: #1e293b;
+            --text-muted: #64748b;
+            --border-color: #e2e8f0;
+            --radius: 12px;
+            --shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            line-height: 1.6;
+            padding-bottom: 4rem;
+        }
+
+        header {
+            background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
+            color: white;
+            padding: 3rem 1rem;
+            text-align: center;
+            margin-bottom: 2rem;
+            box-shadow: var(--shadow);
+        }
+
+        header h1 { font-size: 2.5rem; font-weight: 700; margin-bottom: 0.5rem; letter-spacing: -0.025em; }
+        header p { font-size: 1.1rem; color: #cbd5e1; max-width: 700px; margin: 0 auto; }
+
+        .container { max-width: 1100px; margin: 0 auto; padding: 0 1rem; }
+
+        .section-card {
+            background: var(--card-bg);
+            border-radius: var(--radius);
+            box-shadow: var(--shadow);
+            margin-bottom: 2.5rem;
+            overflow: hidden;
+            border: 1px solid var(--border-color);
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+
+        .section-card:hover {
+            box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+        }
+
+        .section-header {
+            background-color: #f1f5f9;
+            padding: 1.5rem;
+            border-bottom: 1px solid var(--border-color);
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .section-number {
+            background-color: var(--primary);
+            color: white;
+            width: 36px;
+            height: 36px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+            font-weight: 600;
+            font-size: 1.2rem;
+            flex-shrink: 0;
+            box-shadow: 0 2px 4px rgba(37, 99, 235, 0.3);
+        }
+
+        .section-title { font-size: 1.3rem; font-weight: 700; color: var(--text-main); }
+
+        /* Estilos del Formulario de Datos de Empresa */
+        .company-form {
+            padding: 2rem;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1.5rem;
+        }
+
+        .company-form .full-width { grid-column: 1 / -1; }
+
+        .input-group {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+
+        .input-group label {
+            font-weight: 600;
+            font-size: 0.9rem;
+            color: var(--text-main);
+        }
+
+        .input-group input, .input-group textarea {
+            padding: 0.75rem;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            font-family: inherit;
+            font-size: 0.95rem;
+            transition: border-color 0.2s;
+            background-color: #f8fafc;
+        }
+
+        .input-group input:focus, .input-group textarea:focus {
+            outline: none;
+            border-color: var(--primary);
+            background-color: white;
+            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+        }
+
+        .input-group textarea {
+            resize: vertical;
+            min-height: 80px;
+        }
+
+        @media (max-width: 768px) {
+            .company-form { grid-template-columns: 1fr; }
+        }
+
+        /* Estilos de Matriz (Tipo Excel) */
+        .matrix-wrapper { overflow-x: auto; width: 100%; }
+
+        .matrix-table {
+            width: 100%; border-collapse: collapse; min-width: 800px;
+        }
+
+        .matrix-table th {
+            background-color: white; padding: 1.25rem 1rem; text-align: center;
+            font-size: 1.2rem; font-weight: 700; color: var(--text-main);
+            border-bottom: 2px solid var(--border-color); border-left: 1px solid var(--border-color); width: 12%;
+        }
+
+        .matrix-table th:first-child {
+            border-left: none; width: 40%; text-align: left; padding-left: 1.5rem;
+        }
+
+        .matrix-table th span {
+            font-size: 0.8rem; font-weight: 500; display: block; margin-top: 0.5rem; color: var(--text-muted); line-height: 1.3;
+        }
+
+        .matrix-table td {
+            padding: 1rem; border-bottom: 1px solid var(--border-color); border-left: 1px solid var(--border-color); vertical-align: middle;
+        }
+
+        .matrix-table td:first-child { border-left: none; padding-left: 1.5rem; }
+
+        .matrix-table tr:last-child td { border-bottom: none; }
+        .matrix-table tr:hover { background-color: #f8fafc; }
+
+        .question-cell { font-size: 0.95rem; font-weight: 500; color: #334155; line-height: 1.5; }
+        .option-cell { text-align: center; cursor: pointer; transition: all 0.2s ease; }
+        .option-cell:hover { background-color: #f1f5f9; }
+
+        .radio-custom { display: flex; justify-content: center; align-items: center; }
+        .radio-custom input[type="radio"] { width: 1.5rem; height: 1.5rem; accent-color: var(--primary); cursor: pointer; }
+        .option-cell:has(input[type="radio"]:checked) { background-color: #eff6ff !important; box-shadow: inset 0 0 0 2px var(--primary); }
+
+        .submit-container { text-align: center; margin-top: 3rem; }
+
+        .btn-submit {
+            background-color: var(--primary); color: white; border: none; padding: 1.2rem 3rem;
+            font-size: 1.2rem; font-weight: 600; border-radius: 50px; cursor: pointer;
+            transition: all 0.2s ease; box-shadow: 0 4px 15px rgba(37, 99, 235, 0.3);
+        }
+
+        .btn-submit:hover { background-color: var(--primary-hover); transform: translateY(-2px); box-shadow: 0 6px 20px rgba(37, 99, 235, 0.4); }
+        .btn-submit:active { transform: translateY(0); }
+
+        .mobile-label { display: none; }
+
+        @media (max-width: 768px) {
+            .matrix-table, .matrix-table tbody, .matrix-table tr, .matrix-table td { display: block; width: 100%; min-width: 0; }
+            .matrix-table thead { display: none; }
+            .matrix-table tr { 
+                border: 1px solid var(--border-color); border-radius: 8px; margin-bottom: 1.5rem; background: white; padding: 1.5rem; 
+                box-shadow: 0 2px 4px rgba(0,0,0,0.02);
+            }
+            .matrix-table td { border: none !important; padding: 0; }
+            .matrix-table td:first-child { padding-left: 0; }
+            .matrix-table td.question-cell { font-weight: 600; margin-bottom: 1.5rem; color: var(--text-main); font-size: 1.05rem; }
+            .matrix-table td.option-cell { 
+                display: flex; align-items: center; text-align: left; border: 1px solid var(--border-color) !important; 
+                border-radius: 8px; margin-bottom: 0.75rem; padding: 1rem !important; 
+            }
+            .mobile-label { display: block; font-size: 0.95rem; color: var(--text-main); flex: 1; line-height: 1.4; }
+            .mobile-label strong { font-size: 1.1rem; color: var(--primary); margin-right: 0.5rem; display: block; margin-bottom: 0.2rem; }
+            .radio-custom { margin-right: 1.5rem; }
+            .matrix-wrapper { overflow-x: hidden; }
+        }
+
+        /* Results Modal */
+        .results-overlay {
+            position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(15, 23, 42, 0.85); backdrop-filter: blur(8px);
+            display: flex; align-items: center; justify-content: center;
+            z-index: 1000; opacity: 0; pointer-events: none;
+            transition: opacity 0.3s ease; padding: 1rem;
+        }
+
+        .results-overlay.active { opacity: 1; pointer-events: auto; }
+
+        .results-modal {
+            background: white; border-radius: 20px; width: 100%; max-width: 1100px; max-height: 95vh;
+            overflow-y: auto; box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+            transform: translateY(20px); transition: transform 0.3s ease; display: flex; flex-direction: column;
+        }
+
+        .results-overlay.active .results-modal { transform: translateY(0); }
+
+        .modal-header {
+            padding: 2.5rem; border-bottom: 1px solid var(--border-color); position: relative; background: #f8fafc;
+        }
+
+        .modal-actions {
+            position: absolute; top: 1.5rem; right: 1.5rem; display: flex; gap: 1rem; align-items: center;
+        }
+
+        .btn-print {
+            background: var(--text-main); color: white; border: none; padding: 0.6rem 1.2rem;
+            border-radius: 8px; font-weight: 600; cursor: pointer; display: flex; align-items: center; gap: 0.5rem;
+            transition: background 0.2s; font-family: inherit; font-size: 0.9rem;
+        }
+
+        .btn-print:hover { background: #0f172a; }
+
+        .close-btn {
+            font-size: 2rem; cursor: pointer; color: var(--text-muted); line-height: 1; border: none;
+            background: transparent; width: 36px; height: 36px; border-radius: 50%;
+            display: flex; align-items: center; justify-content: center; transition: background 0.2s;
+        }
+
+        .close-btn:hover { background: #e2e8f0; color: var(--text-main); }
+
+        .global-dashboard-top {
+            display: flex; align-items: center; justify-content: center; gap: 3rem; flex-wrap: wrap; margin-top: 1rem;
+        }
+
+        .global-score-circle {
+            width: 160px; height: 160px; border-radius: 50%; display: flex; flex-direction: column; align-items: center;
+            justify-content: center; border: 10px solid; background: white; box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+        }
+
+        .global-score-value { font-size: 3rem; font-weight: 800; line-height: 1; }
+        .global-score-label { font-size: 0.9rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.05em; margin-top: 0.5rem; font-weight: 600; }
+
+        .global-text-info { text-align: left; }
+        .diagnostic-label {
+            display: inline-block; padding: 0.5rem 1.5rem; border-radius: 50px; font-weight: 700; font-size: 1.4rem; margin-bottom: 0.5rem; box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+        }
+        .diagnostic-desc { font-size: 1rem; color: var(--text-muted); margin-top: 0.25rem; }
+
+        .modal-body { padding: 2.5rem; }
+
+        .report-company-info {
+            background: white; border: 1px solid var(--border-color); border-radius: var(--radius);
+            padding: 2rem; margin-bottom: 2.5rem; display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.02);
+        }
+        
+        .report-company-info .full-width { grid-column: 1 / -1; }
+        .info-item { font-size: 0.95rem; }
+        .info-label { font-weight: 700; color: var(--text-muted); text-transform: uppercase; font-size: 0.75rem; letter-spacing: 0.05em; margin-bottom: 0.3rem; }
+        .info-value { color: var(--text-main); font-weight: 500; line-height: 1.5; white-space: pre-wrap; }
+
+        .dashboard-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 2.5rem; }
+
+        @media (max-width: 900px) {
+            .dashboard-grid, .report-company-info { grid-template-columns: 1fr; }
+            .global-dashboard-top { flex-direction: column; text-align: center; gap: 1.5rem; }
+            .global-text-info { text-align: center; }
+            .modal-actions { position: relative; top: 0; right: 0; justify-content: center; margin-bottom: 1rem; }
+        }
+
+        .chart-container {
+            background: white; border: 1px solid var(--border-color); border-radius: var(--radius); padding: 1.5rem;
+            display: flex; flex-direction: column; box-shadow: 0 2px 4px rgba(0,0,0,0.02); min-height: 400px;
+        }
+
+        .chart-title { font-size: 1.1rem; font-weight: 600; margin-bottom: 1rem; color: var(--text-main); text-align: center; }
+        .chart-wrapper { flex: 1; position: relative; width: 100%; }
+
+        .section-results { display: flex; flex-direction: column; gap: 1.25rem; }
+
+        .section-result-item {
+            background: white; border: 1px solid var(--border-color); border-radius: var(--radius); padding: 1.5rem;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.02); transition: transform 0.2s;
+        }
+
+        .result-item-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem; }
+        .result-item-title { font-weight: 600; font-size: 1.05rem; color: var(--text-main); }
+        .result-item-score { font-weight: 800; font-size: 1.25rem; }
+
+        .progress-bar-bg { height: 10px; background: #e2e8f0; border-radius: 5px; overflow: hidden; margin-bottom: 0.75rem; }
+        .progress-bar-fill { height: 100%; border-radius: 5px; transition: width 1.5s cubic-bezier(0.22, 1, 0.36, 1); position: relative; overflow: hidden; }
+        
+        @media print {
+            body { background: white; }
+            header, .container, .submit-container { display: none !important; }
+            #results-overlay { position: relative; background: white; padding: 0; opacity: 1; pointer-events: auto; }
+            .results-modal { box-shadow: none; transform: none; max-height: none; overflow: visible; border-radius: 0; border: none; }
+            .modal-actions { display: none !important; }
+            .chart-container, .section-result-item, .report-company-info { box-shadow: none; border: 1px solid #cbd5e1; break-inside: avoid; }
+            .dashboard-grid { display: block; }
+            .chart-container { margin-bottom: 2rem; }
+            .modal-header { padding: 1rem 0; background: white; border-bottom: 2px solid var(--border-color); }
+            .modal-body { padding: 1rem 0; }
+            /* Force background colors to print */
+            * { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
+        }
+    </style>
+</head>
+<body>
+
+    <header>
+        <h1>Diagnóstico de Desempeño Ambiental 2025</h1>
+        <p>Herramienta integral para evaluar y generar reportes sobre el desempeño ambiental de tu organización.</p>
+    </header>
+
+    <!-- DATOS DE LA EMPRESA -->
+    <div class="container">
+        <div class="section-card">
+            <div class="section-header">
+                <div class="section-number">I</div>
+                <h2 class="section-title">Datos Generales de la Organización</h2>
+            </div>
+            <div class="company-form">
+                <div class="input-group">
+                    <label>Razón Social</label>
+                    <input type="text" id="emp-razon" placeholder="Ej. Grupo Estrella S.A. de C.V.">
+                </div>
+                <div class="input-group">
+                    <label>Nombre Comercial</label>
+                    <input type="text" id="emp-nombre" placeholder="Ej. Deposito Dental Stardent">
+                </div>
+                
+                <div class="input-group">
+                    <label>Actividad Económica</label>
+                    <input type="text" id="emp-actividad" placeholder="Ej. Comercio">
+                </div>
+                <div class="input-group">
+                    <label>Domicilio</label>
+                    <input type="text" id="emp-domicilio" placeholder="Ej. Urbanizacion Santa Elena, Plaza Santa Elena">
+                </div>
+                
+                <div class="input-group">
+                    <label>Departamento</label>
+                    <input type="text" id="emp-depto" placeholder="Ej. La Libertad">
+                </div>
+                <div class="input-group">
+                    <label>Ciudad</label>
+                    <input type="text" id="emp-ciudad" placeholder="Ej. Antiguo Cuscatlán">
+                </div>
+                
+                <div class="input-group">
+                    <label>Teléfono</label>
+                    <input type="text" id="emp-tel" placeholder="Ej. 2522-8000">
+                </div>
+                <div class="input-group">
+                    <label>Sitio Web</label>
+                    <input type="text" id="emp-web" placeholder="Ej. stardent.com.sv">
+                </div>
+                
+                <div class="input-group full-width">
+                    <label>Misión Empresarial</label>
+                    <textarea id="emp-mision" placeholder="Describe la misión de la empresa..."></textarea>
+                </div>
+                <div class="input-group full-width">
+                    <label>Visión Empresarial</label>
+                    <textarea id="emp-vision" placeholder="Describe la visión de la empresa..."></textarea>
+                </div>
+                <div class="input-group full-width">
+                    <label>Descripción de las Principales Actividades Empresariales</label>
+                    <textarea id="emp-desc" placeholder="Especifica en qué rubro opera la empresa..."></textarea>
+                </div>
+                <div class="input-group full-width">
+                    <label>Principales Productos y Servicios</label>
+                    <textarea id="emp-prod" placeholder="Ej. Distribuye marcas reconocidas como 3M (Solventum)..."></textarea>
+                </div>
+                
+                <div class="input-group">
+                    <label>Número de Empleados</label>
+                    <input type="number" id="emp-empleados" placeholder="Ej. 10" min="1">
+                </div>
+                <div class="input-group">
+                    <label>Número de Sedes de la Organización</label>
+                    <input type="number" id="emp-sedes" placeholder="Ej. 1" min="1">
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- FORMULARIO DE DIAGNÓSTICO -->
+    <div class="container" id="form-container">
+        <!-- El contenido se generará con JavaScript -->
+    </div>
+
+    <div class="container submit-container">
+        <button class="btn-submit" id="btn-evaluar">Generar Reporte de Evaluación</button>
+    </div>
+
+    <!-- Modal de Resultados / Reporte -->
+    <div class="results-overlay" id="results-overlay">
+        <div class="results-modal">
+            <div class="modal-header">
+                <div class="modal-actions">
+                    <button class="btn-print" id="btn-print" title="Guardar como PDF o Imprimir">
+                        <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"></path></svg>
+                        Imprimir / Exportar PDF
+                    </button>
+                    <button class="close-btn" id="btn-close" title="Cerrar">&times;</button>
+                </div>
+                
+                <h2 style="text-align: center; color: var(--text-main); margin-bottom: 1rem; font-size: 1.8rem;">Reporte de Desempeño Ambiental</h2>
+                
+                <div class="global-dashboard-top">
+                    <div class="global-score-circle" id="global-circle">
+                        <div class="global-score-value" id="global-score">0%</div>
+                        <div class="global-score-label">Promedio</div>
+                    </div>
+                    <div class="global-text-info">
+                        <div class="diagnostic-label" id="global-diagnostic">Cargando...</div>
+                        <div class="diagnostic-desc">Nivel de Desempeño Ambiental General de la Organización</div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="modal-body">
+                
+                <!-- Datos de la Empresa en el Reporte -->
+                <div class="report-company-info" id="report-company-info">
+                    <!-- JS inyectará los datos aquí -->
+                </div>
+
+                <div class="dashboard-grid">
+                    <!-- Columna Izquierda: Gráfico de Telaraña (Radar) -->
+                    <div class="chart-container">
+                        <div class="chart-title">Balance de Desempeño (Análisis de Brechas)</div>
+                        <div class="chart-wrapper">
+                            <canvas id="radarChart"></canvas>
+                        </div>
+                    </div>
+                    
+                    <!-- Columna Derecha: Detalle por Secciones -->
+                    <div>
+                        <h3 style="margin-bottom: 1.5rem; font-size: 1.25rem; color: var(--text-main);">Resultados por Área Evaluada</h3>
+                        <div class="section-results" id="section-results">
+                            <!-- Resultados por sección generados por JS -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const secciones = [
+            {
+                id: 1, // II
+                titulo: "Planificación Ambiental",
+                preguntas: [
+                    "¿Existe un procedimiento definido para la identificación y priorización de aspectos e impactos ambientales?",
+                    "¿Los aspectos e impactos ambientales son tomados en cuenta para la definición de políticas y programas ambientales de la empresa?",
+                    "¿Se han definido objetivos y metas ambientales?",
+                    "¿Existe un procedimiento de revisión periódica del cumplimiento de objetivos y metas?",
+                    "¿Se tienen establecidos indicadores de sostenibilidad y/o desempeño ambiental en la Organización?",
+                    "¿Los indicadores de sostenibilidad y/o desempeño ambiental se revisan periódicamente?",
+                    "¿Existe un responsable del tema ambiental en la empresa?",
+                    "¿Existe un programa o estrategia de sensibilización y capacitación en temas ambientales?",
+                    "¿Se ha definido una política o compromiso de gestión ambiental?",
+                    "¿Existe una identificación de necesidades de conocimiento en el tema ambiental para el personal de la organización?"
+                ]
+            },
+            {
+                id: 2, // III
+                titulo: "Cumplimiento de Requisitos",
+                preguntas: [
+                    "¿Se ha realizado un análisis de los requisitos legales ambientales aplicables a la empresa?",
+                    "¿Se cuenta con el instrumento, estudio o diagnóstico de impacto ambiental autorizado por la autoridad ambiental?",
+                    "¿La empresa cuenta con documentos que respaldan el cumplimiento de los compromisos legales ambientales?",
+                    "¿Existen criterios para la contratación de proveedores que contribuyan al cumplimiento de los compromisos legales ambientales?",
+                    "¿Existe un procedimiento para verificar que el cumplimiento legal ambiental contribuye a la reducción de los impactos ambientales?"
+                ]
+            },
+            {
+                id: 3, // IV
+                titulo: "Operación y Uso de Recursos",
+                preguntas: [
+                    "¿Se han realizado y/o implementado propuestas de solución que permitan mejorar el Desempeño Ambiental de la Organización?",
+                    "¿Se han definido los requisitos ambientales para la compra de productos y servicios?",
+                    "¿Se han comunicado los requisitos ambientales pertinentes a los proveedores externos?",
+                    "¿Se han establecido los procesos necesarios para prepararse y responder a situaciones potenciales de emergencia?",
+                    "¿Se dispone de medidas planificadas para la prevención y mitigación de los impactos ambientales adversos provocados por situaciones de emergencia?",
+                    "¿Se tienen previstas las medidas para la respuesta ante situaciones de emergencia?"
+                ]
+            },
+            {
+                id: 4, // V
+                titulo: "Gestión de Efluentes y Residuos",
+                preguntas: [
+                    "¿Se han identificado los desechos líquidos generados en la empresa?",
+                    "¿Se conocen las causas de la generación de aguas residuales?",
+                    "¿Se cuenta con programa de gestión de aguas residuales?",
+                    "¿La empresa cuenta con un sistema de clasificación de residuos sólidos?",
+                    "¿Existe un programa de reúso, reciclaje o revalorización de residuos sólidos?",
+                    "¿Se han identificado las emisiones de Gases de Efecto Invernadero y sus respectivas fuentes?",
+                    "¿Se tiene un programa de mitigación y compensación de emisiones de Gases de Efecto Invernadero?"
+                ]
+            }
+        ];
+
+        const opciones = [
+            { valor: 0, texto: "No se ha implementado", porcentaje: "0%" },
+            { valor: 1, texto: "Se ha iniciado el análisis o diseño", porcentaje: "25%" },
+            { valor: 2, texto: "En proceso de revisión final", porcentaje: "50%" },
+            { valor: 3, texto: "Implementado y en operación", porcentaje: "75%" },
+            { valor: 4, texto: "En operación y con revisión continua", porcentaje: "100%" }
+        ];
+
+        // Roman numerals array for sections
+        const numerosRomanos = ["II", "III", "IV", "V"];
+
+        let radarChartInstance = null;
+
+        function getNivelCumplimiento(porcentaje) {
+            if (porcentaje <= 20) return { color: '#ef4444', bgColor: 'rgba(239, 68, 68, 0.1)', texto: 'Cumplimiento Nada Satisfactorio' };
+            if (porcentaje <= 49) return { color: '#f97316', bgColor: 'rgba(249, 115, 22, 0.1)', texto: 'Cumplimiento No Satisfactorio' };
+            if (porcentaje <= 64) return { color: '#eab308', bgColor: 'rgba(234, 179, 8, 0.1)', texto: 'Cumplimiento Parcial' };
+            if (porcentaje <= 74) return { color: '#22c55e', bgColor: 'rgba(34, 197, 94, 0.1)', texto: 'Cumple Satisfactoriamente' };
+            return { color: '#06b6d4', bgColor: 'rgba(6, 182, 212, 0.1)', texto: 'Cumple Totalmente' };
+        }
+
+        function renderFormulario() {
+            const container = document.getElementById('form-container');
+            let html = '';
+
+            secciones.forEach((seccion, index) => {
+                html += `
+                <div class="section-card">
+                    <div class="section-header">
+                        <div class="section-number">${numerosRomanos[index]}</div>
+                        <h2 class="section-title">${seccion.titulo}</h2>
+                    </div>
+                    <div class="matrix-wrapper">
+                        <table class="matrix-table">
+                            <thead>
+                                <tr>
+                                    <th>Aspecto a Evaluar</th>
+                                    ${opciones.map(opt => `
+                                        <th>
+                                            ${opt.porcentaje}
+                                            <span>${opt.texto}</span>
+                                        </th>
+                                    `).join('')}
+                                </tr>
+                            </thead>
+                            <tbody>
+                `;
+
+                seccion.preguntas.forEach((pregunta, pregIndex) => {
+                    const inputName = `s${seccion.id}_p${pregIndex}`;
+                    html += `
+                        <tr>
+                            <td class="question-cell">${pregIndex + 1}. ${pregunta}</td>
+                    `;
+
+                    opciones.forEach(opcion => {
+                        const inputId = `${inputName}_o${opcion.valor}`;
+                        html += `
+                            <td class="option-cell" onclick="document.getElementById('${inputId}').click()">
+                                <div class="radio-custom">
+                                    <input type="radio" name="${inputName}" id="${inputId}" value="${opcion.valor}">
+                                </div>
+                                <div class="mobile-label">
+                                    <strong>${opcion.porcentaje}</strong> ${opcion.texto}
+                                </div>
+                            </td>
+                        `;
+                    });
+
+                    html += `
+                        </tr>
+                    `;
+                });
+
+                html += `
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                `;
+            });
+
+            container.innerHTML = html;
+        }
+
+        function poblarDatosEmpresa() {
+            const infoContainer = document.getElementById('report-company-info');
+            
+            // Función auxiliar para obtener el valor o mostrar un mensaje por defecto
+            const getValue = (id) => document.getElementById(id).value.trim() || 'No especificado';
+            
+            infoContainer.innerHTML = `
+                <div class="info-item"><div class="info-label">Razón Social</div><div class="info-value">${getValue('emp-razon')}</div></div>
+                <div class="info-item"><div class="info-label">Nombre Comercial</div><div class="info-value">${getValue('emp-nombre')}</div></div>
+                <div class="info-item"><div class="info-label">Actividad Económica</div><div class="info-value">${getValue('emp-actividad')}</div></div>
+                <div class="info-item"><div class="info-label">Teléfono</div><div class="info-value">${getValue('emp-tel')}</div></div>
+                <div class="info-item"><div class="info-label">Departamento / Ciudad</div><div class="info-value">${getValue('emp-depto')} / ${getValue('emp-ciudad')}</div></div>
+                <div class="info-item"><div class="info-label">Sitio Web</div><div class="info-value">${getValue('emp-web')}</div></div>
+                <div class="info-item full-width"><div class="info-label">Domicilio</div><div class="info-value">${getValue('emp-domicilio')}</div></div>
+                
+                <div class="info-item full-width"><div class="info-label">Misión Empresarial</div><div class="info-value">${getValue('emp-mision')}</div></div>
+                <div class="info-item full-width"><div class="info-label">Visión Empresarial</div><div class="info-value">${getValue('emp-vision')}</div></div>
+                <div class="info-item full-width"><div class="info-label">Descripción de Actividades</div><div class="info-value">${getValue('emp-desc')}</div></div>
+                <div class="info-item full-width"><div class="info-label">Productos y Servicios Principales</div><div class="info-value">${getValue('emp-prod')}</div></div>
+                
+                <div class="info-item"><div class="info-label">Nº de Empleados</div><div class="info-value">${getValue('emp-empleados')}</div></div>
+                <div class="info-item"><div class="info-label">Nº de Sedes</div><div class="info-value">${getValue('emp-sedes')}</div></div>
+            `;
+        }
+
+        function calcularResultados() {
+            let todasRespondidas = true;
+            let resultadosSecciones = [];
+            let sumaPorcentajes = 0;
+
+            secciones.forEach(seccion => {
+                let puntajeSeccion = 0;
+                let maxPuntajeSeccion = seccion.preguntas.length * 4;
+                let respondidasSeccion = 0;
+
+                seccion.preguntas.forEach((pregunta, pregIndex) => {
+                    const inputName = `s${seccion.id}_p${pregIndex}`;
+                    const seleccionada = document.querySelector(`input[name="${inputName}"]:checked`);
+                    
+                    if (seleccionada) {
+                        puntajeSeccion += parseInt(seleccionada.value);
+                        respondidasSeccion++;
+                    } else {
+                        todasRespondidas = false;
+                    }
+                });
+
+                let porcentajeSeccion = (puntajeSeccion / maxPuntajeSeccion) * 100;
+                
+                resultadosSecciones.push({
+                    titulo: seccion.titulo,
+                    porcentaje: Math.round(porcentajeSeccion)
+                });
+
+                sumaPorcentajes += porcentajeSeccion;
+            });
+
+            if (!todasRespondidas) {
+                alert('Por favor, evalúa todos los aspectos antes de generar el reporte.');
+                // return; // Descomentar en producción para hacer obligatorias las preguntas
+            }
+
+            poblarDatosEmpresa(); // Actualizar la sección de datos en el reporte
+
+            let promedioGeneral = Math.round(sumaPorcentajes / secciones.length);
+            mostrarResultados(promedioGeneral, resultadosSecciones);
+        }
+
+        function mostrarResultados(promedioGeneral, resultadosSecciones) {
+            const overlay = document.getElementById('results-overlay');
+            const evalGeneral = getNivelCumplimiento(promedioGeneral);
+
+            // Actualizar modal general
+            document.getElementById('global-score').innerText = `${promedioGeneral}%`;
+            document.getElementById('global-circle').style.borderColor = evalGeneral.color;
+            document.getElementById('global-score').style.color = evalGeneral.color;
+            
+            const labelGlobal = document.getElementById('global-diagnostic');
+            labelGlobal.innerText = evalGeneral.texto;
+            labelGlobal.style.backgroundColor = evalGeneral.bgColor;
+            labelGlobal.style.color = evalGeneral.color;
+
+            // Actualizar lista de secciones
+            const resultsContainer = document.getElementById('section-results');
+            let htmlSecciones = '';
+
+            resultadosSecciones.forEach(res => {
+                const evalSec = getNivelCumplimiento(res.porcentaje);
+                htmlSecciones += `
+                    <div class="section-result-item" style="border-left: 5px solid ${evalSec.color}">
+                        <div class="result-item-header">
+                            <div class="result-item-title">${res.titulo}</div>
+                            <div class="result-item-score" style="color: ${evalSec.color}">${res.porcentaje}%</div>
+                        </div>
+                        <div class="progress-bar-bg">
+                            <div class="progress-bar-fill" style="width: ${res.porcentaje}%; background-color: ${evalSec.color};"></div>
+                        </div>
+                        <div class="result-item-evaluation" style="color: ${evalSec.color}">${evalSec.texto}</div>
+                    </div>
+                `;
+            });
+
+            resultsContainer.innerHTML = htmlSecciones;
+
+            // Renderizar Gráfico
+            const ctx = document.getElementById('radarChart').getContext('2d');
+            
+            if (radarChartInstance) {
+                radarChartInstance.destroy();
+            }
+
+            radarChartInstance = new Chart(ctx, {
+                type: 'radar',
+                data: {
+                    labels: resultadosSecciones.map(r => r.titulo.split(' ')),
+                    datasets: [{
+                        label: 'Desempeño Obtenido',
+                        data: resultadosSecciones.map(r => r.porcentaje),
+                        backgroundColor: 'rgba(37, 99, 235, 0.2)',
+                        borderColor: 'rgba(37, 99, 235, 0.8)',
+                        pointBackgroundColor: 'rgba(37, 99, 235, 1)',
+                        pointBorderColor: '#fff',
+                        pointHoverBackgroundColor: '#fff',
+                        pointHoverBorderColor: 'rgba(37, 99, 235, 1)',
+                        borderWidth: 2,
+                        fill: true
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        r: {
+                            angleLines: { color: 'rgba(0, 0, 0, 0.1)' },
+                            grid: { color: 'rgba(0, 0, 0, 0.1)' },
+                            pointLabels: {
+                                font: { size: 11, family: "'Inter', sans-serif", weight: '600' },
+                                color: '#475569'
+                            },
+                            ticks: {
+                                beginAtZero: true, max: 100, stepSize: 20,
+                                backdropColor: 'transparent',
+                                font: { size: 10, family: "'Inter', sans-serif" },
+                                color: '#94a3b8'
+                            }
+                        }
+                    },
+                    plugins: {
+                        legend: { display: false },
+                        tooltip: {
+                            backgroundColor: 'rgba(15, 23, 42, 0.9)',
+                            callbacks: {
+                                label: function(context) { return ' ' + context.raw + '%'; },
+                                title: function(context) { return context[0].label.replace(/,/g, ' '); }
+                            }
+                        }
+                    }
+                }
+            });
+
+            overlay.classList.add('active');
+            document.body.style.overflow = 'hidden';
+        }
+
+        function cerrarModal() {
+            document.getElementById('results-overlay').classList.remove('active');
+            document.body.style.overflow = 'auto';
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            renderFormulario();
+            
+            document.getElementById('btn-evaluar').addEventListener('click', calcularResultados);
+            document.getElementById('btn-close').addEventListener('click', cerrarModal);
+            
+            // Botón de imprimir (Activa la ventana de impresión nativa del navegador)
+            document.getElementById('btn-print').addEventListener('click', () => {
+                window.print();
+            });
+            
+            // Evitar cerrar al hacer clic dentro del modal, pero cerrar si hace clic en el overlay
+            document.getElementById('results-overlay').addEventListener('click', (e) => {
+                if (e.target === document.getElementById('results-overlay')) {
+                    cerrarModal();
+                }
+            });
+        });
+    </script>
+</body>
+</html>
