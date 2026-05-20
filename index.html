@@ -523,6 +523,10 @@
                     <textarea id="emp-vision" placeholder="Describe la visión de la empresa..."></textarea>
                 </div>
                 <div class="input-group full-width">
+                    <label>Principios y Valores de la Empresa</label>
+                    <textarea id="emp-valores" placeholder="Ej. Integridad, Responsabilidad, Innovación, Compromiso ambiental..."></textarea>
+                </div>
+                <div class="input-group full-width">
                     <label>Descripción de las Principales Actividades Empresariales</label>
                     <textarea id="emp-desc" placeholder="Especifica en qué rubro opera la empresa..."></textarea>
                 </div>
@@ -626,7 +630,7 @@
         const DRAFT_KEY   = 'clidente_draft';
 
         function getCompanyData() {
-            const fields = ['razon','nombre','actividad','domicilio','depto','ciudad','tel','web','mision','vision','desc','prod','empleados','sedes'];
+            const fields = ['razon','nombre','actividad','domicilio','depto','ciudad','tel','web','mision','vision','valores','desc','prod','empleados','sedes'];
             const data = {};
             fields.forEach(f => { const el = document.getElementById(`emp-${f}`); if (el) data[f] = el.value; });
             return data;
@@ -645,7 +649,7 @@
         }
 
         function restoreCompanyData(data) {
-            const fields = ['razon','nombre','actividad','domicilio','depto','ciudad','tel','web','mision','vision','desc','prod','empleados','sedes'];
+            const fields = ['razon','nombre','actividad','domicilio','depto','ciudad','tel','web','mision','vision','valores','desc','prod','empleados','sedes'];
             fields.forEach(f => { const el = document.getElementById(`emp-${f}`); if (el && data[f] !== undefined) el.value = data[f]; });
         }
 
@@ -892,6 +896,7 @@
                 
                 <div class="info-item full-width"><div class="info-label">Misión Empresarial</div><div class="info-value">${getValue('emp-mision')}</div></div>
                 <div class="info-item full-width"><div class="info-label">Visión Empresarial</div><div class="info-value">${getValue('emp-vision')}</div></div>
+                <div class="info-item full-width"><div class="info-label">Principios y Valores</div><div class="info-value">${getValue('emp-valores')}</div></div>
                 <div class="info-item full-width"><div class="info-label">Descripción de Actividades</div><div class="info-value">${getValue('emp-desc')}</div></div>
                 <div class="info-item full-width"><div class="info-label">Productos y Servicios Principales</div><div class="info-value">${getValue('emp-prod')}</div></div>
                 
